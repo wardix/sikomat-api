@@ -13,7 +13,6 @@ var multer = require("multer")
 var path = require("path");
 var fs = require("fs");
 const jwt = require('jsonwebtoken');
-const { Telegraf } = require('telegraf')
 import { getCustomRepository, getRepository } from "typeorm";
 import { Verify } from "./entity/Verify";
 import { print } from "util";
@@ -112,55 +111,5 @@ createConnection().then(async connection => {
     });
 
      app.listen(5000);
-    const bot = new Telegraf(process.env.BOT_TOKEN)
-    const requestPhoneKeyboard = {
-        "reply_markup": {
-            "one_time_keyboard": true,
-            "keyboard": [
-                [{
-                    text: "Kirim Nomor HP",
-                    request_contact: true,
-                    one_time_keyboard: true
-                }],
-            ]
-        }
-    };
-
-    bot.start((ctx) => ctx.reply('Verifikasi', requestPhoneKeyboard))
-    bot.on('contact', async (ctx) => {
-        let userRepo = getCustomRepository(UserRepository);
-        let phone = ctx.update.message.contact.phone_number;
-        let user = await userRepo.findByHp(phone.replace("62", "0"));
-        if (user != null) {
-            if (user.activation_date == null) {
-                console.log(user);
-                user.telegram_id = ctx.chat.id;
-                user.activation_request_date = new Date();
-                userRepo.save(user);
-                ctx.reply("SALIN KODE AKTIASI DIBAWAH INI, MASUKAN PADA APLIKASI SIKOMAT");
-                setTimeout((() => {
-                    let verifyRepo = getRepository(Verify);
-                    let verify = new Verify();
-                    verify.pin = otpGenerator.generate(10, { upperCase: false, specialChars: false, digits: true, alphabets: false });
-                    verify.hp = phone.replace("62", "0");
-                    let now = new Date();
-                    verify.user_type = user.user_type;
-                    verify.event = "aktivasi";
-                    verify.created = moment(now).format("YYYY-MM-DD HH:mm:ss");
-                    verify.expired = moment(now).add(10, 'minutes').format("YYYY-MM-DD HH:mm:ss");
-                    console.log(verify);
-                    verifyRepo.save(verify);
-                    ctx.reply(verify.pin)
-                }), 2000)
-            } else {
-                ctx.reply("Nomor HP Ini Sudah diaktivasi")
-            }
-
-        } else {
-            ctx.reply("Nomor hp tidak terdaftar")
-        }
-    })
-    bot.launch();
-
     console.log("Express server has started on port 5000");
 }).catch(error => console.log(error));
