@@ -13,7 +13,6 @@ const axios = require('axios')
 
 export class AdminController {
 
-    // private bidanRepo = getCustomRepository(BidanRepository);
     private bidanRepo = getCustomRepository(BidanRepository);
     private riwayatRepo = getRepository(RiwayatPasien);
     private ancRepo = getRepository(Anc);
@@ -193,12 +192,6 @@ export class AdminController {
     }
 
     async anc(request: Request, response: Response, next: NextFunction) {
-        // let data = await this.ancRepo.find({
-        //     relations: ["pasien", "pasien.bidan", "detail_anc", "skreening"],
-        //     order: {
-        //         taksiran_persalinan: "DESC"
-        //     }
-        // })
         let data = await this.ancRepo.createQueryBuilder('anc')
             .innerJoinAndSelect("anc.pasien", "pasien")
             .innerJoinAndSelect("anc.skreening", "skreening")

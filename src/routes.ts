@@ -28,13 +28,6 @@ export const Routes = [
         controller: AuthController,
         action: "checkToken"
     },
-    // {
-    //     method: "post",
-    //     route: "/api/auth/bidan/login",
-    //     controller: AuthController,
-    //     action: "loginBidan"
-    // },
-
     {
         method: "get",
         route: "/api/bidan/profile",

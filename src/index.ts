@@ -25,9 +25,6 @@ var storage = multer.diskStorage({
     destination: async function (req, file, cb) {
         console.log("destination")
         let u = await req.user;
-        // if (!fs.existsSync("protected/" + u.tipe + "/" + (u.tipe == "mahasiswa" ? u.nim : u.nip))) {
-        //     fs.mkdirSync("protected/" + u.tipe + "/" + (u.tipe == "mahasiswa" ? u.nim : u.nip));
-        // }
         cb(null, "uploads/")
     },
     filename: async function (req, file, cb) {
@@ -37,9 +34,7 @@ var storage = multer.diskStorage({
     }
 });
 
-//console.log(require('crypto').randomBytes(64).toString('hex'))
 var upload = multer({ storage: storage });
-// const upload = multer({ dest: 'uploads/' })
 
 createConnection().then(async connection => {
     const app = express();
@@ -47,10 +42,8 @@ createConnection().then(async connection => {
     app.use(express.json());
     app.use(cors())
     app.use(pagination);
-    //app.use(express.static("public"))
     app.use('/public/', express.static('./public'))
 
-    //console.log(process.env.TOKEN_SECRET);
     app.set("json replacer", function (key, value) {
         if (this[key] instanceof Date) {
             value = (moment(this[key])).format("YYYY-MM-DD HH:mm:ss");

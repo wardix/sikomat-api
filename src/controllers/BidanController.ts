@@ -103,9 +103,7 @@ export class BidanController {
 
     async addAnc(request: Request, response: Response, next: NextFunction) {
 
-        // console.log(request.body.danc);
         let anc = await this.ancRepo.findOne({ pasien: request.body.anc.pasien.id });
-        // Object.keys(request.body.anc).forEach((k) => console.log(request.body.anc[k]))
         console.log(anc);
         if (anc == null) {
             Object.keys(request.body.anc).forEach((k) => (request.body.anc[k] == "" || request.body.anc[k] == null) && delete request.body.anc[k]);
@@ -198,15 +196,8 @@ export class BidanController {
                 return this.detailAncRepo.save(request.body.danc);
             }
         }
-
-
-
-
-
-        // Object.keys(pasien).forEach((k) => pasien[k] == "" && delete pasien[k]);
-
-        // pasien.bidan = bidan;
     }
+
     async getAnc(request: Request, response: Response, next: NextFunction) {
         console.log("request.params.pasien " + request.params.pasien)
         let payload = await this.ancRepo.findOne({
@@ -242,7 +233,6 @@ export class BidanController {
             where: {
                 feedback_read: false,
                 feedback: Not(""),
-                // 'pasien.bidan.id' : bidan.id
                 pasien: {
                     bidan: { id: bidan.id }
                 }
@@ -307,7 +297,6 @@ export class BidanController {
         console.log("keluhanPasienAdd");
         console.log(await request.body);
         let data = await request.body.data;
-        //let riwayat_pasien = new RiwayatPasien();
 
         await data.forEach(element => {
             let keluhan_pasien = new DaftarKeluhanPasien();
@@ -380,7 +369,6 @@ export class BidanController {
         console.log("skreening add");
         console.log(await request.body);
         let data = await request.body.data;
-        //let riwayat_pasien = new RiwayatPasien();
         let del = await this.skreeningRepo.find({
             where: { anc: request.body.anc }
         });
