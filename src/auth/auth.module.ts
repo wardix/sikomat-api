@@ -15,7 +15,7 @@ import { LocalSuperuserStrategy } from './strategies/local-superuser.strategy';
     PassportModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: process.env.JWT_EXPIRES }
+      signOptions: { expiresIn: `${process.env.JWT_EXPIRES}d` }
     })
   ],
   providers: [AuthService, LocalSuperuserStrategy],
