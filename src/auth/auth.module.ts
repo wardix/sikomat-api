@@ -7,6 +7,7 @@ import { SuperusersModule } from '../superusers/superusers.module';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { LocalSuperuserStrategy } from './strategies/local-superuser.strategy';
+import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { LocalSuperuserStrategy } from './strategies/local-superuser.strategy';
       signOptions: { expiresIn: `${process.env.JWT_EXPIRES}d` }
     })
   ],
-  providers: [AuthService, LocalSuperuserStrategy],
+  providers: [AuthService, LocalSuperuserStrategy, JwtStrategy],
   controllers: [AuthController]
 })
 export class AuthModule { }
