@@ -11,8 +11,6 @@
       "outDir": "./build",
       "emitDecoratorMetadata": true,
       "experimentalDecorators": true,
-      "skipLibCheck": true,
-      "strictPropertyInitialization": false,
       "sourceMap": true
    }
 }

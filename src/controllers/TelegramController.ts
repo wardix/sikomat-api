@@ -6,6 +6,7 @@ const axios = require("axios");
 export class TelegramController {
 
     async webhooks(request: Request, response: Response, next: NextFunction) {
+        //console.log(request.body)
         console.log(request.body['message']);
         console.log(typeof request.body['message']['contact']);
         if (typeof request.body['message']['contact'] === 'undefined') {

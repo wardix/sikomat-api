@@ -13,6 +13,7 @@ const axios = require('axios')
 
 export class AdminController {
 
+    // private bidanRepo = getCustomRepository(BidanRepository);
     private bidanRepo = getCustomRepository(BidanRepository);
     private riwayatRepo = getRepository(RiwayatPasien);
     private ancRepo = getRepository(Anc);
@@ -53,7 +54,6 @@ export class AdminController {
                 method: 'post',
                 url: 'https://api.telegram.org/bot5046326803:AAE1ItiKmTlJKU3C6TJiJoK8VEUx6dda-3E/sendMessage',
                 data: {
-                    "chat_id": user.telegram_id,
                     "text": `Feedback dari admin untuk pasien : ${data.pasien.nama}, Keluhan: ${data.kelompok_keluhan.nama}, silahkan cek aplikasi`,
                 },
                 config: { headers: { 'Content-Type': 'multipart/form-data' } },
@@ -118,7 +118,6 @@ export class AdminController {
                 method: 'post',
                 url: 'https://api.telegram.org/bot5046326803:AAE1ItiKmTlJKU3C6TJiJoK8VEUx6dda-3E/sendMessage',
                 data: {
-                    "chat_id": user.telegram_id,
                     "text": `Feedback ANC dari admin untuk pasien : ${data.pasien.nama}, silahkan cek aplikasi`,
                 },
                 config: { headers: { 'Content-Type': 'multipart/form-data' } },
@@ -192,6 +191,12 @@ export class AdminController {
     }
 
     async anc(request: Request, response: Response, next: NextFunction) {
+        // let data = await this.ancRepo.find({
+        //     relations: ["pasien", "pasien.bidan", "detail_anc", "skreening"],
+        //     order: {
+        //         taksiran_persalinan: "DESC"
+        //     }
+        // })
         let data = await this.ancRepo.createQueryBuilder('anc')
             .innerJoinAndSelect("anc.pasien", "pasien")
             .innerJoinAndSelect("anc.skreening", "skreening")

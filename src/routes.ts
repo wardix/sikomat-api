@@ -28,6 +28,13 @@ export const Routes = [
         controller: AuthController,
         action: "checkToken"
     },
+    // {
+    //     method: "post",
+    //     route: "/api/auth/bidan/login",
+    //     controller: AuthController,
+    //     action: "loginBidan"
+    // },
+
     {
         method: "get",
         route: "/api/bidan/profile",
@@ -172,14 +179,18 @@ export const Routes = [
         controller: AuthController,
         action: "login"
     },
-
     {
         method: "post",
-        route: "/api/verifylogin",
+        route: "/api/register",
         controller: AuthController,
-        action: "verifylogin"
+        action: "register"
     },
-
+    // {
+    //     method: "post",
+    //     route: "/api/verifylogin",
+    //     controller: AuthController,
+    //     action: "verifylogin"
+    // },
     {
         method: "get",
         route: "/api/user/profile",

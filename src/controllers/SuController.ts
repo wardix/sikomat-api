@@ -80,6 +80,8 @@ export class SuController {
             console.log(bidan);
 
             if (bidan.hp == request.body['hp']) {
+                // Object.keys(request.body).forEach((k) => request.body[k] == "" && delete request.body[k]);
+                // bidan = request.body;
                 console.log("UPDATE HP SAMA")
                 bidan.email = request.body['email'];
                 bidan.nama = request.body['nama'];
@@ -101,6 +103,7 @@ export class SuController {
                     console.log("HP FOUND")
                     console.log(request.body)
                     let user = await this.userRepo.findOne({ hp: bidan.hp })
+                    //Object.keys(request.body).forEach((k) => request.body[k] == "" && delete request.body[k]);
                     bidan.nama = request.body['nama'];
                     bidan.email = request.body['email'];
                     bidan.hp = request.body['hp'];
@@ -233,6 +236,25 @@ export class SuController {
             return { "action_status": "failed", "item": user, "message": "Data Tidak dapat dihapus karena bidan sudah melakukan aktivitas" };
         }
     }
+
+    // async riwayat(request: Request, response: Response, next: NextFunction) {
+    //     let su = await this.suRepository.findOne({
+    //         "username": request.user.username
+    //     });
+    //     let data = await this.riwayatRepo.find({
+
+    //         relations: ["pasien", "pasien.bidan", "kelompok_keluhan", "daftar_keluhan_pasien", 'daftar_keluhan_pasien.keluhan', 'daftar_keluhan_pasien.keluhan.daftar_keluhan'],
+    //         where: {
+    //             pasien: {
+    //                 bidan: { rekanan: su.user_type }
+    //             }
+    //         },
+    //         order: {
+    //             tanggal_periksa: "DESC",
+    //         },
+    //     })
+    //     return { "riwayat_pasien": data };
+    // }
 
     async riwayat(request: Request, response: Response, next: NextFunction) {
         let su = await this.suRepository.findOne({

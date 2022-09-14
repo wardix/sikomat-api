@@ -8,6 +8,7 @@ var fs = require("fs");
 var path = require("path");
 export class UserController {
 
+    // private bidanRepo = getCustomRepository(BidanRepository);
     private userRepo = getCustomRepository(UserRepository);
     private pasienRepo = getRepository(Pasien);
     private riwayatRepo = getRepository(RiwayatPasien);

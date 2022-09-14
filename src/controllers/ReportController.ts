@@ -11,7 +11,7 @@ let pdf = require("html-pdf");
 let path = require("path");
 var fs = require("fs");
 var qr = require("qr-image");
-var { AgeCalculator } = require("@dipaktelangre/age-calculator");
+var { AgeCalculator } = require("@dipaktelangre/age-calculator"); // undefined
 
 export class ReportController {
 
@@ -68,6 +68,10 @@ export class ReportController {
                         console.log("ERROR");
                         return response.json({ "failed": true });
                     } else {
+                        // console.log("NOT ERROR");
+                        // response.contentType("application/pdf");
+                        // //return response.json({ "failed": false });
+                        // return response.send(data);
                         var data = fs.readFileSync("./protected/pasien/" + riwayatPasien.id + ".pdf");
                         response.contentType("application/pdf");
                         response.send(data);

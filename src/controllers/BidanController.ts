@@ -9,6 +9,7 @@ import { DetailAnc } from "../entity/DetailAnc";
 import { UserRepository } from "../repositories/UserRepository";
 import { Skreening } from "../entity/Skreening";
 import * as moment from "moment";
+import { print } from "util";
 var fs = require("fs");
 var path = require("path");
 const axios = require('axios')
@@ -72,26 +73,27 @@ export class BidanController {
     }
 
     async pasienAdd(request: Request, response: Response, next: NextFunction) {
+        // let bidan = await this.bidanRepo.findOne({ hp: request.user.username });
+        // let pasien = await this.pasienRepo.findOne({ id: request.body.id });
 
-        let bidan = await this.bidanRepo.findOne({ hp: request.user.username });
-        let pasien = await this.pasienRepo.findOne({ id: request.body.id });
+        // if (pasien == null) {
+        //     console.log("ADD");
+        //     let newPasien = request.body;
+        //     Object.keys(newPasien).forEach((k) => newPasien[k] == "" && delete newPasien[k]);
+        //     newPasien.bidan = bidan;
+        //     return await this.pasienRepo.save(newPasien);
+        // } else {
+        //     console.log("UPDATE");
+        //     Object.keys(request.body).forEach((k) => request.body[k] == "" && delete request.body[k]);
+        //     Object.keys(request.body).forEach((k) => {
+        //         if (k != 'id' && k != 'bidan') {
+        //             pasien[k] = request.body[k]
+        //         }
+        //     });
+        //     return await this.pasienRepo.save(pasien);
+        // }
 
-        if (pasien == null) {
-            console.log("ADD");
-            let newPasien = request.body;
-            Object.keys(newPasien).forEach((k) => newPasien[k] == "" && delete newPasien[k]);
-            newPasien.bidan = bidan;
-            return await this.pasienRepo.save(newPasien);
-        } else {
-            console.log("UPDATE");
-            Object.keys(request.body).forEach((k) => request.body[k] == "" && delete request.body[k]);
-            Object.keys(request.body).forEach((k) => {
-                if (k != 'id' && k != 'bidan') {
-                    pasien[k] = request.body[k]
-                }
-            });
-            return await this.pasienRepo.save(pasien);
-        }
+        console.log('add data pasien');
     }
 
     async pasienList(request: Request, response: Response, next: NextFunction) {
@@ -103,7 +105,9 @@ export class BidanController {
 
     async addAnc(request: Request, response: Response, next: NextFunction) {
 
+        // console.log(request.body.danc);
         let anc = await this.ancRepo.findOne({ pasien: request.body.anc.pasien.id });
+        // Object.keys(request.body.anc).forEach((k) => console.log(request.body.anc[k]))
         console.log(anc);
         if (anc == null) {
             Object.keys(request.body.anc).forEach((k) => (request.body.anc[k] == "" || request.body.anc[k] == null) && delete request.body.anc[k]);
@@ -155,7 +159,6 @@ export class BidanController {
                         method: 'post',
                         url: 'https://api.telegram.org/bot5046326803:AAE1ItiKmTlJKU3C6TJiJoK8VEUx6dda-3E/sendMessage',
                         data: {
-                            "chat_id": user.telegram_id,
                             "text": `Ada report ANC dari aplikasi bidan silahkan cek aplikasi`,
                         },
                         config: { headers: { 'Content-Type': 'multipart/form-data' } },
@@ -196,8 +199,15 @@ export class BidanController {
                 return this.detailAncRepo.save(request.body.danc);
             }
         }
-    }
 
+
+
+
+
+        // Object.keys(pasien).forEach((k) => pasien[k] == "" && delete pasien[k]);
+
+        // pasien.bidan = bidan;
+    }
     async getAnc(request: Request, response: Response, next: NextFunction) {
         console.log("request.params.pasien " + request.params.pasien)
         let payload = await this.ancRepo.findOne({
@@ -233,6 +243,7 @@ export class BidanController {
             where: {
                 feedback_read: false,
                 feedback: Not(""),
+                // 'pasien.bidan.id' : bidan.id
                 pasien: {
                     bidan: { id: bidan.id }
                 }
@@ -297,6 +308,7 @@ export class BidanController {
         console.log("keluhanPasienAdd");
         console.log(await request.body);
         let data = await request.body.data;
+        //let riwayat_pasien = new RiwayatPasien();
 
         await data.forEach(element => {
             let keluhan_pasien = new DaftarKeluhanPasien();
@@ -321,7 +333,6 @@ export class BidanController {
                 method: 'post',
                 url: 'https://api.telegram.org/bot5046326803:AAE1ItiKmTlJKU3C6TJiJoK8VEUx6dda-3E/sendMessage',
                 data: {
-                    "chat_id": user.telegram_id,
                     "text": `Ada report baru dari aplikasi bidan, pengirim: ${riwayatPasien.pasien.bidan.nama}, Keluhan: ${riwayatPasien.kelompok_keluhan.nama}, silahkan cek aplikasi`,
                 },
                 config: { headers: { 'Content-Type': 'multipart/form-data' } },
@@ -369,6 +380,7 @@ export class BidanController {
         console.log("skreening add");
         console.log(await request.body);
         let data = await request.body.data;
+        //let riwayat_pasien = new RiwayatPasien();
         let del = await this.skreeningRepo.find({
             where: { anc: request.body.anc }
         });
