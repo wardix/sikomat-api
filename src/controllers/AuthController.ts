@@ -262,7 +262,9 @@ export class AuthController {
   }
 
   async register(request: Request, response: Response, next: NextFunction) {
-    const { nama, hp, password, alamat_detail } = request.body;
+    const { nama, hp, password, fcm_token, alamat_detail } = request.body;
+
+    let token = "";
 
     // Password Hashing
     var salt = bcrypt.genSaltSync(10);
@@ -270,6 +272,7 @@ export class AuthController {
 
     // Save Data to User Tabel
     try {
+      token = await this.generateAccessToken({ hp: hp });
       let now = new Date();
       let savedDataPasien = await this.userRepository.insert({
         nama: nama,
@@ -278,6 +281,7 @@ export class AuthController {
         email: null,
         user_type: "bidan",
         status: 0,
+        fcm_token: fcm_token,
         activation_request_date: moment(now).format("YYYY-MM-DD HH:mm:ss"),
       });
       console.log(savedDataPasien);
@@ -292,14 +296,16 @@ export class AuthController {
       console.log(savedDataBidan);
 
       return {
+        token: token,
         msg: "Registrasi berhasil!",
         user: await this.userRepository.findOne(savedDataPasien.raw[0].id),
         status: 200,
-        success: false,
-        bidan: await this.bidanRepo.findOne(savedDataPasien.raw[0].id),
+        success: true,
+        bidan: await this.bidanRepo.findByHp(hp),
       };
     } catch (error) {
       return {
+        token: token,
         msg: error.detail,
         user: {},
         status: 404,

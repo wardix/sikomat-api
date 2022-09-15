@@ -73,27 +73,25 @@ export class BidanController {
     }
 
     async pasienAdd(request: Request, response: Response, next: NextFunction) {
-        // let bidan = await this.bidanRepo.findOne({ hp: request.user.username });
-        // let pasien = await this.pasienRepo.findOne({ id: request.body.id });
+        let bidan = await this.bidanRepo.findOne({ hp: request.user.username });
+        let pasien = await this.pasienRepo.findOne({ id: request.body.id });
 
-        // if (pasien == null) {
-        //     console.log("ADD");
-        //     let newPasien = request.body;
-        //     Object.keys(newPasien).forEach((k) => newPasien[k] == "" && delete newPasien[k]);
-        //     newPasien.bidan = bidan;
-        //     return await this.pasienRepo.save(newPasien);
-        // } else {
-        //     console.log("UPDATE");
-        //     Object.keys(request.body).forEach((k) => request.body[k] == "" && delete request.body[k]);
-        //     Object.keys(request.body).forEach((k) => {
-        //         if (k != 'id' && k != 'bidan') {
-        //             pasien[k] = request.body[k]
-        //         }
-        //     });
-        //     return await this.pasienRepo.save(pasien);
-        // }
-
-        console.log('add data pasien');
+        if (pasien == null) {
+            console.log("ADD");
+            let newPasien = request.body;
+            Object.keys(newPasien).forEach((k) => newPasien[k] == "" && delete newPasien[k]);
+            newPasien.bidan = bidan;
+            return await this.pasienRepo.save(newPasien);
+        } else {
+            console.log("UPDATE");
+            Object.keys(request.body).forEach((k) => request.body[k] == "" && delete request.body[k]);
+            Object.keys(request.body).forEach((k) => {
+                if (k != 'id' && k != 'bidan') {
+                    pasien[k] = request.body[k]
+                }
+            });
+            return await this.pasienRepo.save(pasien);
+        }
     }
 
     async pasienList(request: Request, response: Response, next: NextFunction) {
