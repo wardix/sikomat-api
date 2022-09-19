@@ -13,7 +13,8 @@ const date = require('date-and-time')
 const requestIp = require('request-ip');
 require("dotenv").config();
 const moment = require("moment");
-const axios = require('axios')
+const axios = require('axios');
+const bcrypt = require('bcryptjs');
 
 export class AuthController {
     private userRepository = getCustomRepository(UserRepository);
@@ -113,47 +114,132 @@ export class AuthController {
     }
 
     async login(request: Request, response: Response, next: NextFunction) {
-        let user = await this.userRepository.findByHp(request.body['hp']);
-        if (user != null) {
-            if (user.activation_date != null) {
-                var otpGenerator = require('otp-generator')
-                let verifyRepo = getRepository(Verify);
-                let verify = new Verify();
-                verify.pin = otpGenerator.generate(5, { alphabets: false, upperCase: false, specialChars: false });
-                verify.hp = request.body['hp'];
-                let now = new Date();
-                verify.event = "login";
-                verify.user_type = user.user_type
-                verify.created = moment(now).format("YYYY-MM-DD HH:mm:ss");
-                verify.expired = moment(now).add(10, 'minutes').format("YYYY-MM-DD HH:mm:ss");
-                console.log(verify);
-                verifyRepo.save(verify);
-                await axios({
-                    method: 'post',
-                    url: 'https://api.telegram.org/bot5046326803:AAE1ItiKmTlJKU3C6TJiJoK8VEUx6dda-3E/sendMessage',
-                    data: {
-                        "chat_id": user.telegram_id,
-                        "text": "Kode Akses Untuk Masuk: " + verify.pin,
-                    },
-                    config: { headers: { 'Content-Type': 'multipart/form-data' } },
-                })
-                    .then(function (response) {
-                        console.log(response)
+        const username = request.body.username;
+        const password = request.body.password;
 
-                    })
-                    .catch(function (error) {
-                        console.log(error)
-                    })
-                return { "pin": verify.pin, msg: "OK", success: true, "telegram_id": user.telegram_id };
+        let userFetch = await this.userRepository.findByHp(username);
+
+        if (userFetch != null) {
+            if (bcrypt.compareSync(password, userFetch.password)) {
+                if (userFetch.status == 1 && userFetch.activation_date != null) {
+                    const now = new Date();
+                    const token = await this.generateAccessToken({
+                        username: userFetch.hp,
+                    });
+                    let auth = {
+                        created: now,
+                        expired: date.addDays(now, 365),
+                        id: userFetch.id,
+                        ip: requestIp.getClientIp(request),
+                        platform: request.headers["user-agent"],
+                        user_type: "bidan",
+                        username: userFetch.hp,
+                        token: token,
+                    };
+                    await this.authRepository.save(auth);
+                    if (userFetch.user_type == "bidan") {
+                        let bidan = await this.bidanRepo.findByHp(userFetch.hp);
+                        return {
+                            token: token,
+                            msg: "Berhasil Login",
+                            user: userFetch,
+                            bidan: bidan,
+                            success: true,
+                        };
+                    } else {
+                        return {
+                            token: token,
+                            msg: "Berhasil Login",
+                            user: userFetch,
+                            success: true,
+                        };
+                    }
+                } else {
+                    return {
+                        token: "",
+                        msg: "Akun anda belum diaktivasi oleh Admin!",
+                        user: {},
+                        status: 200,
+                        success: false,
+                        bidan: {},
+                    };
+                }
             } else {
-                return { "pin": "", msg: "NOMOR HP DITEMUKAN BELUM MELAKUKAN AKTIVASI, LAKUKAN AKTIVASI TERLEBIH DAHULU", success: false, "telegram_id": "" };
+                return {
+                    token: "",
+                    msg: "Username atau Password Salah!",
+                    user: {},
+                    status: 200,
+                    success: false,
+                    bidan: {},
+                };
             }
         } else {
-            return { "pin": "", msg: "NOMOR HP TIDAK DITEMUKAN", success: false, "telegram_id": "" };
+            return {
+                token: "",
+                msg: "Akun anda belum terdaftar!",
+                user: {},
+                status: 200,
+                success: false,
+                bidan: {},
+            };
         }
-
-
     }
+
+    async register(request: Request, response: Response, next: NextFunction) {
+        const { nama, hp, password, fcm_token, alamat_detail } = request.body;
+
+        let token = "";
+
+        // Password Hashing
+        var salt = bcrypt.genSaltSync(10);
+        var hashPassword = bcrypt.hashSync(password, salt);
+
+        // Save Data to User Tabel
+        try {
+            token = await this.generateAccessToken({ hp: hp });
+            let now = new Date();
+            let savedDataPasien = await this.userRepository.insert({
+                nama: nama,
+                hp: hp,
+                password: hashPassword,
+                email: null,
+                user_type: "bidan",
+                status: 0,
+                fcm_token: fcm_token,
+                activation_request_date: moment(now).format("YYYY-MM-DD HH:mm:ss"),
+            });
+            console.log(savedDataPasien);
+
+            let savedDataBidan = await this.bidanRepo.insert({
+                nama: nama,
+                hp: hp,
+                email: null,
+                alamat_detail: alamat_detail,
+                rekanan: "ibi",
+            });
+            console.log(savedDataBidan);
+
+            return {
+                token: token,
+                msg: "Registrasi berhasil!",
+                user: await this.userRepository.findOne(savedDataPasien.raw[0].id),
+                status: 200,
+                success: true,
+                bidan: await this.bidanRepo.findByHp(hp),
+            };
+        } catch (error) {
+            return {
+                token: token,
+                msg: error.detail,
+                user: {},
+                status: 404,
+                success: false,
+                bidan: {},
+            };
+        }
+    }
+
     async loginAdmin(request: Request, response: Response, next: NextFunction) {
         let user = await this.userRepository.findOne({ hp: request.body["hp"] })
         let token = ""
